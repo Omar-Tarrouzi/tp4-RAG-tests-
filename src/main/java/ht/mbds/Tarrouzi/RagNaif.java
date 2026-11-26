@@ -20,6 +20,11 @@ import dev.langchain4j.model.google.genai.GoogleGenAiChatModel;
 import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.service.AiServices;
+
+import dev.langchain4j.rag.DefaultRetrievalAugmentor;
+import dev.langchain4j.rag.RetrievalAugmentor;
+import dev.langchain4j.rag.query.transformer.CompressingQueryTransformer;
+
 public class RagNaif {
     public static void main(String[] args) {
         Document document = ClassPathDocumentLoader.loadDocument(
@@ -51,6 +56,8 @@ public class RagNaif {
                 .apiKey(apiKey)
                 .modelName("gemini-3.5-flash")
                 .logRequestsAndResponses(true)
+                .timeout(java.time.Duration.ofSeconds(60))
+                .maxRetries(0)
                 .build();
 
         ContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
@@ -59,18 +66,32 @@ public class RagNaif {
                 .maxResults(2)
                 .minScore(0.5)
                 .build();
-
+        RetrievalAugmentor augmentor = DefaultRetrievalAugmentor.builder()
+                .queryTransformer(new CompressingQueryTransformer(model))
+                .contentRetriever(retriever)
+                .build();
         Assistant assistant = AiServices.builder(Assistant.class)
                 .chatModel(model)
                 .chatMemory(MessageWindowChatMemory.withMaxMessages(10))
-                .contentRetriever(retriever)
+                .retrievalAugmentor(augmentor)
                 .build();
 
 //        String question = "Quelle est la signification de 'RAG' et à quoi ça sert ?";
 //        String reponse = assistant.chat(question);
 //        System.out.println(reponse);
 
-
+        boolean test2 = true;
+        if (test2) {
+            for (String question : List.of(
+                    "Qu'est-ce que le fine-tuning ?",
+                    "Dans le support de cours fourni, à quoi c'est comparé ?"
+            )) {
+                System.out.println("Question > " + question);
+                String reponse = assistant.chat(question);
+                System.out.println("Gemini > " + reponse);
+            }
+            return;
+        }
         try (Scanner scanner = new Scanner(System.in)) {
             while (true) {
                 System.out.print("Question (ou 'quitter') > ");
