@@ -50,6 +50,7 @@ public class RagNaif {
         ChatModel model = GoogleGenAiChatModel.builder()
                 .apiKey(apiKey)
                 .modelName("gemini-3.5-flash")
+                .logRequestsAndResponses(true)
                 .build();
 
         ContentRetriever retriever = EmbeddingStoreContentRetriever.builder()
