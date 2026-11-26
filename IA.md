@@ -5,3 +5,4 @@ réponse : Le programme est bloqué sur le premier appel à Gemini. Clique sur l
 .maxRetries(0)
 
 => finalement 'ai opter de hard code les questions car les tentative de trouble shooting me faisait dépasser mon quota journalier'
+  +> Le probleme a été resolue lors du test 3 , probablement du au trafique sur le modéle
